@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horlogerie — Ma Wishlist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0a0a0a; color: #e8e2d9; font-family: 'Inter', sans-serif; }
+    :root {
+      --gold: #c9a96e; --gold-light: #e8d5a3; --gold-dark: #8a6d3b;
+      --bg: #0a0a0a; --bg2: #111111; --bg3: #1a1a1a; --bg4: #222222;
+      --border: rgba(201,169,110,0.18); --border2: rgba(201,169,110,0.35);
+      --text: #e8e2d9; --text2: #a89880; --text3: #665e52; --red: #c9534f;
+    }
+    .app { min-height: 100vh; }
+    .header { border-bottom: 1px solid var(--border); padding: 2rem 2.5rem 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+    .header-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; }
+    .logo-title { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; letter-spacing: -0.02em; color: var(--text); line-height: 1; }
+    .logo-sub { font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-top: 2px; }
+    .count-badge { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text3); border: 1px solid var(--border); padding: 6px 14px; border-radius: 2px; }
+    .search-bar { display: flex; gap: 10px; }
+    .search-input { flex: 1; background: var(--bg3); border: 1px solid var(--border); color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.9rem; padding: 12px 18px; outline: none; transition: border-color 0.2s; border-radius: 2px; }
+    .search-input::placeholder { color: var(--text3); }
+    .search-input:focus { border-color: var(--gold); }
+    .btn-add { background: var(--gold); color: #0a0a0a; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 24px; border-radius: 2px; transition: background 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+    .btn-add:hover:not(:disabled) { background: var(--gold-light); }
+    .btn-add:disabled { opacity: 0.5; cursor: not-allowed; }
+    .api-key-banner { background: var(--bg3); border: 1px solid var(--border2); padding: 1rem 2.5rem; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .api-key-banner label { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); white-space: nowrap; }
+    .api-key-input { flex: 1; min-width: 220px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.85rem; padding: 8px 14px; outline: none; border-radius: 2px; transition: border-color 0.2s; }
+    .api-key-input:focus { border-color: var(--gold); }
+    .api-key-note { font-size: 0.75rem; color: var(--text3); }
+    .api-key-note a { color: var(--gold); text-decoration: none; }
+    .filters { padding: 1rem 2.5rem; border-bottom: 1px solid var(--border); display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .filter-label { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text3); margin-right: 4px; }
+    .filter-select { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); font-family: 'Inter', sans-serif; font-size: 0.8rem; padding: 7px 28px 7px 12px; cursor: pointer; outline: none; border-radius: 2px; transition: border-color 0.2s; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23665e52'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+    .filter-select:focus { border-color: var(--gold); }
+    .grid { padding: 2rem 2.5rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem; }
+    .card { background: var(--bg2); border: 1px solid var(--border); cursor: pointer; transition: border-color 0.25s, transform 0.2s; border-radius: 2px; overflow: hidden; display: flex; flex-direction: column; }
+    .card:hover { border-color: var(--gold); transform: translateY(-2px); }
+    .card-img-wrap { aspect-ratio: 4/3; overflow: hidden; background: var(--bg3); display: flex; align-items: center; justify-content: center; position: relative; }
+    .card-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .card-img-fallback { font-size: 3.5rem; color: var(--text3); font-family: 'Playfair Display', serif; font-style: italic; }
+    .card-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .card-brand { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+    .card-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+    .card-price { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; color: var(--gold); margin-top: 4px; }
+    .card-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; padding-top: 8px; }
+    .tag { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid var(--border); color: var(--text3); padding: 3px 8px; border-radius: 2px; }
+    .skel { background: linear-gradient(90deg, var(--bg3) 25%, var(--bg4) 50%, var(--bg3) 75%); background-size: 200% 100%; animation: shimmer 1.6s infinite; border-radius: 2px; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .loading-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 2px; overflow: hidden; }
+    .error-msg { background: rgba(201,83,79,0.08); border: 1px solid rgba(201,83,79,0.25); color: #e07a77; font-size: 0.82rem; padding: 12px 18px; border-radius: 2px; margin: 0 2.5rem 1.5rem; }
+    .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6rem 2rem; gap: 1rem; text-align: center; }
+    .empty-icon { font-family: 'Playfair Display', serif; font-size: 4rem; color: var(--text3); font-style: italic; }
+    .empty-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--text2); }
+    .empty-sub { font-size: 0.85rem; color: var(--text3); max-width: 340px; line-height: 1.6; }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(10,10,10,0.3); border-top-color: #0a0a0a; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: flex-start; justify-content: center; z-index: 100; padding: 2rem 1rem; overflow-y: auto; }
+    .modal { background: var(--bg2); border: 1px solid var(--border2); width: 100%; max-width: 760px; border-radius: 2px; overflow: hidden; }
+    .modal-img-wrap { width: 100%; aspect-ratio: 16/7; background: var(--bg3); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .modal-img { width: 100%; height: 100%; object-fit: cover; }
+    .modal-img-fallback { font-size: 5rem; color: var(--text3); font-family: 'Playfair Display', serif; font-style: italic; }
+    .modal-body { padding: 2rem; }
+    .modal-brand { font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; color: var(--text); line-height: 1.1; margin-bottom: 1.5rem; }
+    .specs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 1.5rem; }
+    .spec { background: var(--bg2); padding: 1rem; }
+    .spec-label { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+    .spec-value { font-size: 0.95rem; font-weight: 500; color: var(--text); }
+    .spec-value.gold { color: var(--gold); font-family: 'Playfair Display', serif; font-size: 1.1rem; }
+    .modal-desc { font-size: 0.88rem; line-height: 1.7; color: var(--text2); margin-bottom: 1.5rem; border-left: 2px solid var(--gold-dark); padding-left: 1rem; }
+    .links-title { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+    .links-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .link-btn { background: transparent; border: 1px solid var(--border2); color: var(--text2); font-family: 'Inter', sans-serif; font-size: 0.75rem; padding: 8px 14px; cursor: pointer; border-radius: 2px; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.05em; }
+    .link-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+    .notes-label { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+    .notes-area { width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.875rem; padding: 12px 14px; resize: vertical; min-height: 100px; outline: none; transition: border-color 0.2s; border-radius: 2px; line-height: 1.6; }
+    .notes-area::placeholder { color: var(--text3); }
+    .notes-area:focus { border-color: var(--gold); }
+    .modal-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; }
+    .btn-close { background: transparent; border: 1px solid var(--border); color: var(--text3); font-family: 'Inter', sans-serif; font-size: 0.75rem; padding: 8px 18px; cursor: pointer; border-radius: 2px; letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.2s; }
+    .btn-close:hover { border-color: var(--text3); color: var(--text2); }
+    .btn-remove { background: transparent; border: 1px solid rgba(201,83,79,0.3); color: var(--red); font-family: 'Inter', sans-serif; font-size: 0.75rem; padding: 8px 18px; cursor: pointer; border-radius: 2px; letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.2s; }
+    .btn-remove:hover { background: rgba(201,83,79,0.1); }
+    @media (max-width: 640px) {
+      .header, .api-key-banner, .filters { padding-left: 1.25rem; padding-right: 1.25rem; }
+      .grid { padding: 1.25rem; gap: 1rem; grid-template-columns: 1fr 1fr; }
+      .logo-title { font-size: 1.5rem; }
+      .modal-body { padding: 1.25rem; }
+      .specs-grid { grid-template-columns: 1fr; }
+      .modal-actions { flex-direction: column-reverse; gap: 8px; }
+      .btn-close, .btn-remove { width: 100%; text-align: center; }
+      .error-msg { margin-left: 1.25rem; margin-right: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <header class="header">
+    <div class="header-top">
+      <div class="logo">
+        <div class="logo-title">Horlogerie</div>
+        <div class="logo-sub">Ma collection de désirs</div>
+      </div>
+      <div class="count-badge" id="count-badge">0 pièce</div>
+    </div>
+    <div class="search-bar">
+      <input class="search-input" id="search-input" placeholder="Rolex Submariner, Omega Speedmaster, Patek 5711…" />
+      <button class="btn-add" id="btn-add">＋ Ajouter</button>
+    </div>
+  </header>
+
+  <div class="api-key-banner">
+    <label for="api-key-input">Clé API Anthropic</label>
+    <input class="api-key-input" id="api-key-input" type="password" placeholder="sk-ant-api03-…" />
+    <span class="api-key-note">Obtenez votre clé sur <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com</a>. Elle est stockée localement uniquement.</span>
+  </div>
+
+  <div id="error-container"></div>
+
+  <div class="filters" id="filters" style="display:none;">
+    <span class="filter-label">Trier</span>
+    <select class="filter-select" id="sort-select">
+      <option value="added">Ajout récent</option>
+      <option value="prix_asc">Prix croissant</option>
+      <option value="prix_desc">Prix décroissant</option>
+      <option value="marque">Marque A–Z</option>
+      <option value="diametre">Diamètre</option>
+    </select>
+    <span class="filter-label" style="margin-left:8px">Marque</span>
+    <select class="filter-select" id="brand-select"><option value="all">Toutes</option></select>
+    <span class="filter-label" style="margin-left:8px">Mouvement</span>
+    <select class="filter-select" id="mouvement-select"><option value="all">Tous</option></select>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" style="display:none;">
+  <div class="modal" id="modal">
+    <div class="modal-img-wrap">
+      <img class="modal-img" id="modal-img" src="" alt="" style="display:none;" />
+      <div class="modal-img-fallback" id="modal-img-fallback"></div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-brand" id="modal-brand"></div>
+      <div class="modal-title" id="modal-title"></div>
+      <div class="specs-grid">
+        <div class="spec"><div class="spec-label">Prix estimé</div><div class="spec-value gold" id="modal-prix"></div></div>
+        <div class="spec"><div class="spec-label">Mouvement</div><div class="spec-value" id="modal-mouvement"></div></div>
+        <div class="spec"><div class="spec-label">Diamètre</div><div class="spec-value" id="modal-diametre"></div></div>
+        <div class="spec"><div class="spec-label">Référence</div><div class="spec-value" id="modal-ref"></div></div>
+      </div>
+      <div class="modal-desc" id="modal-desc" style="display:none;"></div>
+      <div id="modal-links-wrap">
+        <div class="links-title">Trouver cette montre</div>
+        <div class="links-row" id="modal-links"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="notes-label">Notes personnelles</div>
+      <textarea class="notes-area" id="modal-notes" placeholder="Impressions, cotes observées, état du marché…"></textarea>
+      <div class="modal-actions">
+        <button class="btn-close" id="modal-close">Fermer</button>
+        <button class="btn-remove" id="modal-remove">Retirer de la collection</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'watch-wishlist-v1';
+  let watches = [];
+  let selectedId = null;
+
+  // ── Storage (localStorage) ──────────────────────────────────────────────
+  function loadWatches() {
+    try { watches = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) { watches = []; }
+  }
+  function saveWatches() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(watches));
+  }
+
+  // ── Utils ───────────────────────────────────────────────────────────────
+  function formatPrice(p) {
+    if (!p) return 'Prix inconnu';
+    const n = parseInt(String(p).replace(/[^\d]/g, ''));
+    if (!n) return p;
+    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+  }
+
+  function getApiKey() {
+    return document.getElementById('api-key-input').value.trim();
+  }
+
+  // ── Prompt ──────────────────────────────────────────────────────────────
+  function buildPrompt(query) {
+    return `Tu es un expert horloger. L'utilisateur cherche cette montre : "${query}".
+
+Génère une fiche structurée en JSON (AUCUN texte avant/après, UNIQUEMENT le JSON).
+
+{
+  "marque": "Nom de la marque",
+  "reference": "Référence officielle",
+  "nom": "Nom complet du modèle",
+  "description": "Description courte et élégante (2-3 phrases, style éditorial luxueux)",
+  "mouvement": "Automatique" ou "Quartz" ou "Manuel",
+  "diametre": 40,
+  "prix_estime": 5500,
+  "image_url": "URL directe d'une image représentative (jpg ou png), de préférence depuis le site officiel ou source fiable",
+  "liens": [
+    {"site": "Chrono24", "url": "URL de recherche Chrono24 pour ce modèle"},
+    {"site": "eBay", "url": "URL de recherche eBay pour ce modèle"},
+    {"site": "Amazon", "url": "URL de recherche Amazon pour ce modèle"},
+    {"site": "Boutique officielle", "url": "URL de la boutique officielle ou site de la marque"}
+  ]
+}
+
+Utilise ta connaissance et la recherche web pour trouver des URLs réelles et précises.`;
+  }
+
+  // ── API call ─────────────────────────────────────────────────────────────
+  async function fetchWatch(query) {
+    const key = getApiKey();
+    if (!key) throw new Error('Veuillez entrer votre clé API Anthropic.');
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{ role: 'user', content: buildPrompt(query) }]
+      })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error?.message || 'Erreur API');
+    const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+    const clean = text.replace(/```json|```/g, '').trim();
+    const start = clean.indexOf('{'); const end = clean.lastIndexOf('}');
+    if (start === -1) throw new Error('Réponse JSON invalide');
+    return JSON.parse(clean.slice(start, end + 1));
+  }
+
+  // ── Render ───────────────────────────────────────────────────────────────
+  function getFiltered() {
+    const sort = document.getElementById('sort-select').value;
+    const brand = document.getElementById('brand-select').value;
+    const mouv = document.getElementById('mouvement-select').value;
+    return watches
+      .filter(w => brand === 'all' || w.marque === brand)
+      .filter(w => mouv === 'all' || w.mouvement === mouv)
+      .sort((a, b) => {
+        if (sort === 'prix_asc') return (a.prix_estime || 0) - (b.prix_estime || 0);
+        if (sort === 'prix_desc') return (b.prix_estime || 0) - (a.prix_estime || 0);
+        if (sort === 'marque') return (a.marque || '').localeCompare(b.marque || '');
+        if (sort === 'diametre') return (b.diametre || 0) - (a.diametre || 0);
+        return (b.added_at || 0) - (a.added_at || 0);
+      });
+  }
+
+  function updateFilters() {
+    const brands = [...new Set(watches.map(w => w.marque).filter(Boolean))].sort();
+    const mouvements = [...new Set(watches.map(w => w.mouvement).filter(Boolean))].sort();
+    const bs = document.getElementById('brand-select');
+    const ms = document.getElementById('mouvement-select');
+    const bv = bs.value; const mv = ms.value;
+    bs.innerHTML = '<option value="all">Toutes</option>' + brands.map(b => `<option value="${b}">${b}</option>`).join('');
+    ms.innerHTML = '<option value="all">Tous</option>' + mouvements.map(m => `<option value="${m}">${m}</option>`).join('');
+    bs.value = bv; ms.value = mv;
+    document.getElementById('filters').style.display = watches.length > 0 ? '' : 'none';
+  }
+
+  function renderGrid(loading = false) {
+    const grid = document.getElementById('grid');
+    const filtered = getFiltered();
+    const badge = document.getElementById('count-badge');
+    badge.textContent = watches.length + (watches.length === 1 ? ' pièce' : ' pièces');
+
+    let html = '';
+
+    if (loading) {
+      html += `<div class="loading-card">
+        <div class="skel" style="height:180px"></div>
+        <div style="padding:1.25rem;display:flex;flex-direction:column;gap:10px">
+          <div class="skel" style="height:10px;width:40%"></div>
+          <div class="skel" style="height:16px;width:80%"></div>
+          <div class="skel" style="height:12px;width:60%"></div>
+        </div>
+      </div>`;
+    }
+
+    if (filtered.length === 0 && !loading) {
+      grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
+        <div class="empty-icon">∞</div>
+        <div class="empty-title">${watches.length === 0 ? 'Votre wishlist est vide' : 'Aucune montre ne correspond'}</div>
+        <div class="empty-sub">${watches.length === 0 ? 'Recherchez une montre par son nom ou sa référence. L\'IA génèrera une fiche complète automatiquement.' : 'Essayez de modifier vos filtres.'}</div>
+      </div>`;
+      return;
+    }
+
+    filtered.forEach(w => {
+      const imgHtml = w.image_url
+        ? `<img class="card-img" src="${w.image_url}" alt="${w.nom || ''}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+           <div class="card-img-fallback" style="display:none">${(w.marque||'?')[0]}</div>`
+        : `<div class="card-img-fallback">${(w.marque||'?')[0]}</div>`;
+      const noteTag = w.notes ? `<span class="tag" style="color:var(--gold-dark);border-color:var(--gold-dark)">Note ✦</span>` : '';
+      html += `<div class="card" data-id="${w.id}">
+        <div class="card-img-wrap">${imgHtml}</div>
+        <div class="card-body">
+          <div class="card-brand">${w.marque || ''}</div>
+          <div class="card-name">${w.nom || w.reference || ''}</div>
+          <div class="card-price">${formatPrice(w.prix_estime)}</div>
+          <div class="card-meta">
+            ${w.mouvement ? `<span class="tag">${w.mouvement}</span>` : ''}
+            ${w.diametre ? `<span class="tag">${w.diametre}mm</span>` : ''}
+            ${noteTag}
+          </div>
+        </div>
+      </div>`;
+    });
+
+    grid.innerHTML = html;
+
+    grid.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', () => openModal(card.dataset.id));
+    });
+  }
+
+  function showError(msg) {
+    const c = document.getElementById('error-container');
+    c.innerHTML = msg ? `<div class="error-msg">⚠ ${msg}</div>` : '';
+  }
+
+  // ── Add watch ─────────────────────────────────────────────────────────────
+  async function addWatch() {
+    const input = document.getElementById('search-input');
+    const btn = document.getElementById('btn-add');
+    const query = input.value.trim();
+    if (!query) return;
+    showError('');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Recherche…';
+    renderGrid(true);
+    try {
+      const watch = await fetchWatch(query);
+      watch.id = Date.now() + Math.random();
+      watch.notes = '';
+      watch.added_at = Date.now();
+      watches.unshift(watch);
+      saveWatches();
+      input.value = '';
+      updateFilters();
+      renderGrid();
+    } catch(e) {
+      showError(e.message);
+      renderGrid();
+    }
+    btn.disabled = false;
+    btn.innerHTML = '＋ Ajouter';
+  }
+
+  // ── Modal ─────────────────────────────────────────────────────────────────
+  function openModal(id) {
+    const w = watches.find(x => String(x.id) === String(id));
+    if (!w) return;
+    selectedId = w.id;
+    const img = document.getElementById('modal-img');
+    const fb = document.getElementById('modal-img-fallback');
+    if (w.image_url) {
+      img.src = w.image_url; img.alt = w.nom || ''; img.style.display = '';
+      img.onerror = () => { img.style.display = 'none'; fb.style.display = ''; };
+      fb.style.display = 'none';
+    } else {
+      img.style.display = 'none'; fb.style.display = '';
+    }
+    fb.textContent = (w.marque || '?')[0];
+    document.getElementById('modal-brand').textContent = `${w.marque || ''} · ${w.reference || ''}`;
+    document.getElementById('modal-title').textContent = w.nom || w.reference || '';
+    document.getElementById('modal-prix').textContent = formatPrice(w.prix_estime);
+    document.getElementById('modal-mouvement').textContent = w.mouvement || '—';
+    document.getElementById('modal-diametre').textContent = w.diametre ? `${w.diametre} mm` : '—';
+    document.getElementById('modal-ref').textContent = w.reference || '—';
+    const desc = document.getElementById('modal-desc');
+    if (w.description) { desc.textContent = w.description; desc.style.display = ''; } else { desc.style.display = 'none'; }
+    const linksRow = document.getElementById('modal-links');
+    linksRow.innerHTML = (w.liens || []).map(l => `<a class="link-btn" href="${l.url}" target="_blank" rel="noopener noreferrer">↗ ${l.site}</a>`).join('');
+    document.getElementById('modal-notes').value = w.notes || '';
+    document.getElementById('modal-overlay').style.display = '';
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').style.display = 'none';
+    selectedId = null;
+  }
+
+  // ── Events ────────────────────────────────────────────────────────────────
+  document.getElementById('btn-add').addEventListener('click', addWatch);
+  document.getElementById('search-input').addEventListener('keydown', e => { if (e.key === 'Enter') addWatch(); });
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === document.getElementById('modal-overlay')) closeModal(); });
+
+  document.getElementById('modal-remove').addEventListener('click', () => {
+    watches = watches.filter(w => w.id !== selectedId);
+    saveWatches(); updateFilters(); renderGrid(); closeModal();
+  });
+
+  document.getElementById('modal-notes').addEventListener('input', e => {
+    if (!selectedId) return;
+    watches = watches.map(w => w.id === selectedId ? { ...w, notes: e.target.value } : w);
+    saveWatches();
+    renderGrid();
+  });
+
+  document.getElementById('api-key-input').addEventListener('change', e => {
+    localStorage.setItem('anthropic-api-key', e.target.value);
+  });
+
+  ['sort-select', 'brand-select', 'mouvement-select'].forEach(id => {
+    document.getElementById(id).addEventListener('change', () => renderGrid());
+  });
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  const savedKey = localStorage.getItem('anthropic-api-key');
+  if (savedKey) document.getElementById('api-key-input').value = savedKey;
+  loadWatches();
+  updateFilters();
+  renderGrid();
+</script>
+</body>
+</html>
